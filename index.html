@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AMP Rizz Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    background-image: url('https://ampatutd.com/wp-content/uploads/2026/04/bg.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .card {
+    background: rgba(255,255,255,0.88);
+    border: 0.5px solid rgba(200,150,170,0.3);
+    border-radius: 12px;
+    padding: 1.5rem 1.75rem;
+    width: 100%;
+    max-width: 520px;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 3px 10px;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    background: #fce8f0;
+    color: #99234e;
+  }
+  .question {
+    font-size: 20px;
+    font-weight: 500;
+    color: #222;
+    margin: 0 0 1.5rem;
+    line-height: 1.4;
+  }
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .choice {
+    background: rgba(255,255,255,0.7);
+    border: 0.5px solid #e080aa;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    font-size: 15px;
+    color: #c03878;
+    text-align: left;
+    transition: background 0.12s;
+    font-family: inherit;
+  }
+  .choice:hover { background: rgba(255,220,235,0.85); }
+  .ending {
+    font-size: 20px;
+    font-weight: 500;
+    color: #222;
+    margin: 0 0 1rem;
+    line-height: 1.5;
+  }
+  .ending-img {
+    width: 100%;
+    max-width: 340px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 1.25rem;
+  }
+  .splash-img {
+    width: 100%;
+    max-width: 320px;
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto 1.5rem;
+  }
+  .restart {
+    margin-top: 1.25rem;
+    background: transparent;
+    border: 0.5px solid #e080aa;
+    border-radius: 8px;
+    padding: 0.65rem 1.2rem;
+    cursor: pointer;
+    font-size: 14px;
+    color: #c03878;
+    display: block;
+    font-family: inherit;
+  }
+  .restart:hover { background: rgba(255,220,235,0.6); }
+  .progress {
+    font-size: 12px;
+    color: #b06080;
+    margin-top: 1rem;
+  }
+  .coin-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 0 1rem;
+  }
+  .coin {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: #f4c0d1;
+    border: 3px solid #e080aa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 500;
+    color: #99234e;
+  }
+  .coin.spinning { animation: spin 0.7s ease-out; }
+  .coin-result { font-size: 16px; color: #99234e; font-weight: 500; }
+  .coin-sub { font-size: 13px; color: #b06080; }
+  @keyframes spin {
+    0%   { transform: rotateY(0deg); }
+    50%  { transform: rotateY(540deg) scale(1.1); }
+    100% { transform: rotateY(1080deg); }
+  }
+</style>
+</head>
+<body>
+<div class="card" id="card"></div>
+<script>
+const nodes = {
+  1: {
+    q: "Welcome to the AMP Rizz Quiz!",
+    splash: "https://ampatutd.com/wp-content/uploads/2026/04/TEMOC_SMIRK1.png",
+    choices: [{ label: "Let's go!", to: 2 }]
+  },
+  2: { q: "Are you in a relationship?", choices: [{ label: "Yes", to: 5 }, { label: "No", to: 11 }, { label: "Multiple", to: 3 }] },
+  3: { q: "Are you furry?", choices: [{ label: "Yes", to: 4 }, { label: "No", to: 5 }] },
+  4: { ending: "There's nowhere left to hide, Ratford. Come in quietly.", img: "https://ampatutd.com/wp-content/uploads/2026/04/Average_Yuri.png" },
+  5: { q: "Do you enjoy it?", choices: [{ label: "Yes", to: 6 }, { label: "No", to: 11 }] },
+  6: { q: "Flip a coin.", coin: true, choices: [{ label: "Heads", to: 8 }, { label: "Tails", to: 7 }] },
+  7: { ending: "You have a date! Your rizz levels are\u2026 OVER 9000!!!", img: "https://ampatutd.com/wp-content/uploads/2026/04/Temoc_with_game1.png" },
+  8: { q: "Your relationship is on the rocks. What will you do?", choices: [{ label: "Best to end it now", to: 11 }, { label: "Anything it takes to make up", to: 9 }] },
+  9: { q: "Absolutely anything?", choices: [{ label: "...no?", to: 18 }, { label: "Anything.", to: 10 }] },
+  10: { ending: "You're on your partner's leash. Now be a good little Valentine and roll over.", img: "https://ampatutd.com/wp-content/uploads/2026/04/Temoc_hello_kitty1.png" },
+  11: { q: "Do you ever skip showering?", choices: [{ label: "Yes", to: 12 }, { label: "No", to: 18 }] },
+  12: { q: "Do you play Valorant or LoL?", choices: [{ label: "Yes", to: 13 }, { label: "No", to: 14 }] },
+  13: { ending: "We know what you are. Condemned to ECS South for eternity.", img: "https://ampatutd.com/wp-content/uploads/2026/04/Condemned-to-ECS-South-Eternity.png" },
+  14: { q: "Have you ever felt instinctually drawn to Temoc?", choices: [{ label: "Yes", to: 15 }, { label: "No", to: 18 }] },
+  15: { q: "Do you hear his call from the tunnels?", choices: [{ label: "Yes", to: 17 }, { label: "No", to: 16 }] },
+  16: { q: "Open your soul to the truth.", choices: [{ label: "...(proceed)", to: 15 }] },
+  17: { ending: "You will go to him. Visit the AMP office (SU 1.601C) for a gift of protection." },
+  18: { q: "Where would you bring someone on a date?", choices: [{ label: "Dining hall", to: 21 }, { label: "Halal Shack", to: 19 }, { label: "Construction sites", to: 22 }, { label: "Off campus", to: 23 }, { label: "Coffee place", to: 23 }] },
+  19: { q: "Why?", choices: [{ label: "Because it's halal", to: 20 }, { label: "Because it's good", to: 21 }] },
+  20: { ending: "No kiss before marriage." },
+  21: { ending: "Left on read. You kinda deserve this.", img: "https://ampatutd.com/wp-content/uploads/2026/04/TEMOC_Left_on_read.png" },
+  22: { ending: "Your Valentine is\u2026 Enarc! Your relationship will reach new heights!" },
+  23: { q: "What field are you planning on going into?", choices: [{ label: "Education", to: 24 }, { label: "Medicine", to: 25 }, { label: "Engineering", to: 26 }, { label: "Business", to: 26 }, { label: "Art", to: 26 }, { label: "Other", to: 7 }] },
+  24: { ending: "You're probably already engaged. Save me some cake, please." },
+  25: { ending: "You'll undergo mitosis and birth your true love. Don't question it." },
+  26: { q: "Do you have an internship/apprenticeship?", choices: [{ label: "Yes", to: 7 }, { label: "No", to: 27 }] },
+  27: { ending: "Your true love is waiting for you\u2026 at the homeless shelter." }
+};
+
+let history = [];
+let current = 1;
+
+function renderCoin(node) {
+  const card = document.getElementById('card');
+  const back = history.length > 0 ? `<button class="restart" onclick="goBack()">Back</button>` : '';
+  card.innerHTML = `
+    <div class="badge">Question ${current}</div>
+    <div class="question">${node.q}</div>
+    <div class="coin-wrap">
+      <div class="coin" id="coin">?</div>
+      <button class="choice" style="width:auto;padding:0.75rem 2rem;" onclick="flipCoin()">Flip!</button>
+    </div>
+    ${back}
+    ${history.length > 0 ? `<div class="progress">${history.length} step${history.length !== 1 ? 's' : ''} in</div>` : ''}
+  `;
+}
+
+function flipCoin() {
+  const result = Math.random() < 0.5 ? 'Heads' : 'Tails';
+  const coinEl = document.getElementById('coin');
+  coinEl.textContent = '?';
+  coinEl.classList.remove('spinning');
+  void coinEl.offsetWidth;
+  coinEl.classList.add('spinning');
+  const flipBtn = document.querySelector('.coin-wrap button');
+  if (flipBtn) flipBtn.disabled = true;
+  setTimeout(() => {
+    coinEl.textContent = result === 'Heads' ? 'H' : 'T';
+    const wrap = document.querySelector('.coin-wrap');
+    wrap.innerHTML += `<div class="coin-result">It's ${result}!</div><div class="coin-sub">Moving on\u2026</div>`;
+    const node = nodes[current];
+    const dest = node.choices.find(c => c.label === result).to;
+    setTimeout(() => go(dest), 1200);
+  }, 700);
+}
+
+function render(id) {
+  const node = nodes[id];
+  const card = document.getElementById('card');
+  if (node.coin) { renderCoin(node); return; }
+  if (node.ending) {
+    const imgHtml = node.img ? `<img src="${node.img}" class="ending-img" alt="" />` : '';
+    card.innerHTML = `
+      <div class="badge">Ending reached</div>
+      <div class="ending">${node.ending}</div>
+      ${imgHtml}
+      <button class="restart" onclick="restart()">Play again</button>
+    `;
+  } else {
+    const splashHtml = node.splash ? `<img src="${node.splash}" class="splash-img" alt="" />` : '';
+    const label = id === 1 ? '' : `<div class="badge">Question ${id}</div>`;
+    const back = history.length > 0 ? `<button class="restart" onclick="goBack()">Back</button>` : '';
+    card.innerHTML = `
+      ${label}
+      <div class="question">${node.q}</div>
+      ${splashHtml}
+      <div class="choices">${node.choices.map(c => `<button class="choice" onclick="go(${c.to})">${c.label}</button>`).join('')}</div>
+      ${back}
+      ${history.length > 0 ? `<div class="progress">${history.length} step${history.length !== 1 ? 's' : ''} in</div>` : ''}
+    `;
+  }
+}
+
+function go(id) { history.push(current); current = id; render(id); }
+function goBack() { current = history.pop(); render(current); }
+function restart() { history = []; current = 1; render(1); }
+
+render(1);
+</script>
+</body>
+</html>
